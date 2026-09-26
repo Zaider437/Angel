@@ -6,7 +6,7 @@
 <title>Письмо для Ангелины</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
-  
+
   body {
     min-height: 100vh;
     background: linear-gradient(135deg, #0f0c29, #302b63, #24243e, #0f0c29);
@@ -18,14 +18,14 @@
     font-family: 'Georgia', 'Times New Roman', serif;
     overflow: hidden;
   }
-  
+
   @keyframes aurora {
     0%, 100% { background-position: 0% 50%; }
     25% { background-position: 100% 0%; }
     50% { background-position: 100% 100%; }
     75% { background-position: 0% 100%; }
   }
-  
+
   .blob {
     position: fixed;
     border-radius: 50%;
@@ -34,19 +34,19 @@
     z-index: 0;
     pointer-events: none;
   }
-  
+
   .blob-1 { width: 500px; height: 500px; background: #ff6ec7; top: -100px; left: -100px; animation: b1 12s ease-in-out infinite; }
   .blob-2 { width: 400px; height: 400px; background: #42d392; bottom: -50px; right: -50px; animation: b2 15s ease-in-out infinite; }
   .blob-3 { width: 300px; height: 300px; background: #f9d423; top: 50%; left: 50%; transform: translate(-50%, -50%); animation: b3 10s ease-in-out infinite; }
   .blob-4 { width: 350px; height: 350px; background: #7873f5; top: 30%; right: -80px; animation: b4 18s ease-in-out infinite; }
   .blob-5 { width: 280px; height: 280px; background: #ff9a9e; bottom: 10%; left: 10%; animation: b5 14s ease-in-out infinite; }
-  
+
   @keyframes b1 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(100px, 50px) scale(1.1); } }
   @keyframes b2 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-80px, -60px) scale(1.15); } }
   @keyframes b3 { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-40%, -60%) scale(1.2); } }
   @keyframes b4 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(-60px, 40px) scale(1.1); } }
   @keyframes b5 { 0%, 100% { transform: translate(0, 0) scale(1); } 50% { transform: translate(50px, -40px) scale(1.15); } }
-  
+
   .vignette {
     position: fixed;
     inset: 0;
@@ -54,18 +54,18 @@
     z-index: 2;
     pointer-events: none;
   }
-  
+
   .scene {
     position: relative;
     z-index: 10;
-    width: 700px;
+    width: 720px;
     max-width: 95vw;
-    height: 520px;
+    height: 540px;
     perspective: 1200px;
     perspective-origin: 50% 40%;
     cursor: pointer;
   }
-  
+
   .envelope {
     position: relative;
     width: 100%;
@@ -75,11 +75,11 @@
     transition: transform 1.4s cubic-bezier(0.23, 1, 0.32, 1);
     will-change: transform;
   }
-  
+
   .envelope.open {
     transform: rotateY(0deg) rotateX(0deg) translateY(-50px);
   }
-  
+
   .envelope-body {
     position: absolute;
     bottom: 0;
@@ -90,10 +90,9 @@
     border: 1px solid rgba(255,255,255,0.15);
     border-radius: 16px;
     box-shadow: 0 30px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05) inset;
-    transform: translateZ(0);
     backface-visibility: hidden;
   }
-  
+
   .envelope-flap {
     position: absolute;
     top: 0;
@@ -111,12 +110,47 @@
     backface-visibility: hidden;
     will-change: transform;
   }
-  
+
   .envelope.open .envelope-flap {
     transform: rotateX(180deg);
     z-index: 0;
   }
-  
+
+  .wax-seal {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90px;
+    height: 90px;
+    background: radial-gradient(circle at 35% 35%, #ff6ec7, #c9184a, #8b0000);
+    border-radius: 50%;
+    z-index: 5;
+    box-shadow: 0 6px 25px rgba(201, 24, 74, 0.7), 0 0 0 4px rgba(255,255,255,0.1) inset;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: rgba(255,255,255,0.9);
+    text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    transition: all 0.7s cubic-bezier(0.23, 1, 0.32, 1);
+    cursor: pointer;
+  }
+
+  .envelope.open .wax-seal {
+    transform: translate(-50%, -50%) scale(0) rotate(220deg);
+    opacity: 0;
+  }
+
+  .wax-seal::before {
+    content: '';
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 40% 40%, rgba(255,255,255,0.25), transparent 60%);
+    pointer-events: none;
+  }
+
   .letter {
     position: absolute;
     bottom: 4%;
@@ -131,16 +165,18 @@
     color: #fff;
     transform-style: preserve-3d;
     transform: translateZ(20px);
-    transition: transform 0.9s 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    transition: transform 0.9s 0.5s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.7s 0.3s ease;
     box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05) inset;
     z-index: 1;
     will-change: transform;
+    opacity: 0.5;
   }
-  
+
   .envelope.open .letter {
     transform: translateZ(50px) translateY(-35px);
+    opacity: 1;
   }
-  
+
   .letter-shine {
     position: absolute;
     inset: 0;
@@ -150,12 +186,12 @@
     animation: shine 5s ease-in-out infinite;
     pointer-events: none;
   }
-  
+
   @keyframes shine {
     0%, 100% { background-position: 200% 0; }
     50% { background-position: -100% 0; }
   }
-  
+
   .ribbon {
     display: inline-block;
     font-size: 12px;
@@ -164,13 +200,13 @@
     color: rgba(255,255,255,0.5);
     margin-bottom: 14px;
   }
-  
+
   .emoji-line {
     font-size: 28px;
     letter-spacing: 10px;
     margin: 14px 0 18px;
   }
-  
+
   .name {
     font-size: clamp(32px, 7vw, 58px);
     font-weight: 700;
@@ -185,7 +221,7 @@
     filter: drop-shadow(0 0 25px rgba(180,130,255,0.5));
     letter-spacing: 2px;
   }
-  
+
   .message {
     font-size: clamp(14px, 2vw, 17px);
     line-height: 1.65;
@@ -193,7 +229,7 @@
     margin-bottom: 22px;
     font-style: italic;
   }
-  
+
   .message strong {
     font-style: normal;
     background: linear-gradient(90deg, #ff9a9e, #fad0c4);
@@ -201,21 +237,21 @@
     background-clip: text;
     -webkit-text-fill-color: transparent;
   }
-  
+
   .divider {
     width: 50px;
     height: 1px;
     background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
     margin: 0 auto 18px;
   }
-  
+
   .ps {
     font-size: 13px;
     color: rgba(255,255,255,0.45);
     line-height: 1.6;
     font-style: italic;
   }
-  
+
   .hint {
     position: absolute;
     bottom: -44px;
@@ -226,21 +262,52 @@
     letter-spacing: 2px;
     white-space: nowrap;
     animation: pulse 2s ease-in-out infinite;
+    transition: opacity 0.4s ease;
   }
-  
+
   @keyframes pulse {
     0%, 100% { opacity: 0.4; }
     50% { opacity: 0.9; }
   }
-  
+
   @keyframes iridescent {
     0% { background-position: 0% 50%; }
     50% { background-position: 100% 50%; }
     100% { background-position: 0% 50%; }
   }
-  
-  .envelope, .envelope-flap, .letter, .name, .letter-shine {
+
+  .envelope, .envelope-flap, .letter, .name, .letter-shine, .wax-seal {
     backface-visibility: hidden;
+  }
+
+  .sparkle-particle {
+    position: fixed;
+    width: 4px;
+    height: 4px;
+    background: #fff;
+    border-radius: 50%;
+    pointer-events: none;
+    z-index: 8;
+    animation: sparkle 3s ease-in-out infinite;
+  }
+
+  @keyframes sparkle {
+    0%, 100% { opacity: 0; transform: scale(0) translateY(0); }
+    50% { opacity: 1; transform: scale(1) translateY(-20px); box-shadow: 0 0 10px #ff6ec7, 0 0 20px #7873f5; }
+  }
+
+  .bg-3d-item {
+    position: fixed;
+    pointer-events: none;
+    z-index: 3;
+    opacity: 0;
+    animation: itemAppear 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards;
+    filter: drop-shadow(0 0 15px rgba(255,110,199,0.4)) drop-shadow(0 0 30px rgba(120,115,245,0.3));
+  }
+
+  @keyframes itemAppear {
+    from { opacity: 0; transform: translateY(40px) scale(0.6) rotate(-15deg); }
+    to { opacity: 0.8; transform: translateY(0) scale(1) rotate(0deg); }
   }
 </style>
 </head>
@@ -272,9 +339,10 @@
       </p>
     </div>
     <div class="envelope-body"></div>
-    <div class="envelope-flap" id="flap"></div>
+    <div class="envelope-flap"></div>
+    <div class="wax-seal" id="seal">💌</div>
   </div>
-  <div class="hint" id="hint">✦ нажмите, чтобы открыть ✦</div>
+  <div class="hint" id="hint">✦ нажмите печать, чтобы открыть ✦</div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
@@ -283,23 +351,23 @@
   const canvas = document.createElement('canvas');
   canvas.style.cssText = 'position:fixed;top:0;left:0;width:100%;height:100%;z-index:1;pointer-events:none;';
   document.body.prepend(canvas);
-  
+
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(60, innerWidth / innerHeight, 0.1, 100);
   camera.position.z = 20;
-  
+
   const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
   renderer.setSize(innerWidth, innerHeight);
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  
+
   scene.add(new THREE.AmbientLight(0xffffff, 0.4));
   const light = new THREE.PointLight(0xffffff, 2, 60);
   light.position.set(10, 10, 20);
   scene.add(light);
-  
+
   const tmpColor = new THREE.Color();
   const flowers = [];
-  
+
   function makeMat() {
     return new THREE.MeshPhongMaterial({
       color: 0xffffff,
@@ -310,7 +378,7 @@
       side: THREE.DoubleSide
     });
   }
-  
+
   function createSimpleFlower() {
     const g = new THREE.Group();
     const mat = makeMat();
@@ -328,7 +396,7 @@
     g.userData.mat = mat;
     return g;
   }
-  
+
   function createMultiLayerFlower() {
     const g = new THREE.Group();
     const mat = makeMat();
@@ -351,7 +419,7 @@
     g.userData.mat = mat;
     return g;
   }
-  
+
   function createSpikyFlower() {
     const g = new THREE.Group();
     const mat = makeMat();
@@ -368,7 +436,7 @@
     g.userData.mat = mat;
     return g;
   }
-  
+
   function createBellFlower() {
     const g = new THREE.Group();
     const mat = makeMat();
@@ -386,9 +454,9 @@
     g.userData.mat = mat;
     return g;
   }
-  
+
   const builders = [createSimpleFlower, createMultiLayerFlower, createSpikyFlower, createBellFlower];
-  
+
   for (let i = 0; i < 50; i++) {
     const f = builders[Math.floor(Math.random() * builders.length)]();
     f.position.set(
@@ -411,21 +479,21 @@
     scene.add(f);
     flowers.push(f);
   }
-  
+
   let mouseX = 0, mouseY = 0;
   document.addEventListener('mousemove', e => {
     mouseX = (e.clientX / innerWidth - 0.5) * 2;
     mouseY = (e.clientY / innerHeight - 0.5) * 2;
   });
-  
+
   function animate() {
     requestAnimationFrame(animate);
     const t = performance.now() * 0.001;
-    
+
     camera.position.x += (mouseX * 2.5 - camera.position.x) * 0.025;
     camera.position.y += (-mouseY * 1.5 - camera.position.y) * 0.025;
     camera.lookAt(0, 0, 0);
-    
+
     for (const f of flowers) {
       const u = f.userData;
       f.rotation.x += u.rot.x;
@@ -433,29 +501,54 @@
       f.rotation.z += u.rot.z;
       f.position.y = u.baseY + Math.sin(t * u.floatSpeed + u.floatPhase) * u.ampY;
       f.position.x = u.baseX + Math.cos(t * u.floatSpeed * 0.7 + u.floatPhase) * u.ampX;
-      
+
       const hue = (u.hue + t * u.hueSpeed) % 1;
       tmpColor.setHSL(hue, 0.85, 0.55);
       u.mat.color.copy(tmpColor);
       u.mat.emissive.copy(tmpColor);
     }
-    
+
     renderer.render(scene, camera);
   }
   animate();
-  
+
   addEventListener('resize', () => {
     camera.aspect = innerWidth / innerHeight;
     camera.updateProjectionMatrix();
     renderer.setSize(innerWidth, innerHeight);
   });
-  
-  // === Envelope open/close ===
+
+  // === Envelope open/close with wax seal break ===
   const sceneEl = document.getElementById('scene');
   const envelope = document.getElementById('envelope');
+  const seal = document.getElementById('seal');
   const hint = document.getElementById('hint');
   let isOpen = false;
-  
+
+  function createSealParticles() {
+    const rect = seal.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const colors = ['#ff6ec7', '#c9184a', '#8b0000', '#ff9a9e', '#fad0c4', '#7873f5', '#42d392'];
+    for (let i = 0; i < 18; i++) {
+      const p = document.createElement('div');
+      const size = 4 + Math.random() * 6;
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      p.style.cssText = `position:fixed;width:${size}px;height:${size}px;background:${color};border-radius:50%;pointer-events:none;z-index:20;left:${cx}px;top:${cy}px;`;
+      document.body.appendChild(p);
+      const angle = Math.random() * Math.PI * 2;
+      const dist = 50 + Math.random() * 80;
+      const tx = Math.cos(angle) * dist;
+      const ty = Math.sin(angle) * dist - 40;
+      const rot = Math.random() * 720 - 360;
+      p.animate([
+        { transform: 'translate(0, 0) scale(1) rotate(0deg)', opacity: 1 },
+        { transform: `translate(${tx}px, ${ty}px) scale(0) rotate(${rot}deg)`, opacity: 0 }
+      ], { duration: 800, easing: 'cubic-bezier(0.23, 1, 0.32, 1)' });
+      setTimeout(() => p.remove(), 900);
+    }
+  }
+
   function toggleEnvelope(e) {
     if (isOpen) {
       envelope.classList.remove('open');
@@ -463,11 +556,65 @@
     } else {
       envelope.classList.add('open');
       hint.style.display = 'none';
+      setTimeout(createSealParticles, 150);
     }
     isOpen = !isOpen;
   }
-  
-  sceneEl.addEventListener('click', toggleEnvelope);
+
+  seal.addEventListener('click', toggleEnvelope);
+
+  // === 3D background items appearing like scroll reveal ===
+  function spawnBackgroundItem(emoji, size, left, top, delay) {
+    setTimeout(() => {
+      const el = document.createElement('div');
+      el.className = 'bg-3d-item';
+      el.textContent = emoji;
+      el.style.cssText = `font-size:${size}px;left:${left};top:${top};animation-delay:${delay}s;transform:translateY(40px) scale(0.6);`;
+      el.style.filter = 'drop-shadow(0 0 20px rgba(255,110,199,0.5)) drop-shadow(0 0 40px rgba(120,115,245,0.3))';
+      document.body.appendChild(el);
+      requestAnimationFrame(() => {
+        el.style.animation = `itemAppear 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards`;
+      });
+    }, delay);
+  }
+
+  spawnBackgroundItem('🌸', 48, '8%', '12%', 600);
+  spawnBackgroundItem('🌺', 40, '85%', '18%', 900);
+  spawnBackgroundItem('✨', 32, '15%', '75%', 1200);
+  spawnBackgroundItem('💫', 36, '80%', '70%', 1500);
+  spawnBackgroundItem('🦋', 44, '90%', '30%', 1800);
+  spawnBackgroundItem('🌷', 38, '5%', '45%', 2100);
+  spawnBackgroundItem('⭐', 34, '75%', '85%', 2400);
+  spawnBackgroundItem('🌹', 42, '20%', '88%', 2700);
+  spawnBackgroundItem('💖', 36, '50%', '10%', 3000);
+  spawnBackgroundItem('🌼', 40, '92%', '55%', 3300);
+
+  // === Sparkles around letter when opened ===
+  function createSparkles() {
+    const rect = sceneEl.getBoundingClientRect();
+    for (let i = 0; i < 10; i++) {
+      const s = document.createElement('div');
+      s.className = 'sparkle-particle';
+      s.style.left = (rect.left + Math.random() * rect.width) + 'px';
+      s.style.top = (rect.top + Math.random() * rect.height) + 'px';
+      s.style.animationDelay = (Math.random() * 2) + 's';
+      s.style.animationDuration = (2 + Math.random() * 2) + 's';
+      document.body.appendChild(s);
+      setTimeout(() => s.remove(), 5000);
+    }
+  }
+
+  const originalToggle = toggleEnvelope;
+  toggleEnvelope = function(e) {
+    originalToggle(e);
+    if (!isOpen) {
+      setTimeout(createSparkles, 900);
+      // Spawn extra decorative items on open
+      spawnBackgroundItem('💝', 36, '45%', '90%', 100);
+      spawnBackgroundItem('🌻', 40, '10%', '20%', 300);
+      spawnBackgroundItem('💐', 44, '88%', '80%', 500);
+    }
+  };
 </script>
 
 </body>
