@@ -63,7 +63,6 @@
     height: 540px;
     perspective: 1200px;
     perspective-origin: 50% 40%;
-    cursor: pointer;
   }
 
   .envelope {
@@ -74,6 +73,7 @@
     transform: rotateY(-6deg) rotateX(3deg);
     transition: transform 1.4s cubic-bezier(0.23, 1, 0.32, 1);
     will-change: transform;
+    cursor: pointer;
   }
 
   .envelope.open {
@@ -91,6 +91,7 @@
     border-radius: 16px;
     box-shadow: 0 30px 60px rgba(0,0,0,0.7), 0 0 0 1px rgba(255,255,255,0.05) inset;
     backface-visibility: hidden;
+    z-index: 3;
   }
 
   .envelope-flap {
@@ -105,7 +106,7 @@
     transform-origin: top center;
     transform-style: preserve-3d;
     transition: transform 0.9s cubic-bezier(0.23, 1, 0.32, 1);
-    z-index: 2;
+    z-index: 4;
     box-shadow: 0 -5px 30px rgba(0,0,0,0.4);
     backface-visibility: hidden;
     will-change: transform;
@@ -164,17 +165,19 @@
     text-align: center;
     color: #fff;
     transform-style: preserve-3d;
-    transform: translateZ(20px);
+    transform: translateZ(0px) translateY(20px);
     transition: transform 0.9s 0.5s cubic-bezier(0.23, 1, 0.32, 1), opacity 0.7s 0.3s ease;
     box-shadow: 0 10px 40px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.05) inset;
-    z-index: 1;
+    z-index: 2;
     will-change: transform;
-    opacity: 0.5;
+    opacity: 0;
+    pointer-events: none;
   }
 
   .envelope.open .letter {
     transform: translateZ(50px) translateY(-35px);
     opacity: 1;
+    pointer-events: auto;
   }
 
   .letter-shine {
@@ -276,7 +279,7 @@
     100% { background-position: 0% 50%; }
   }
 
-  .envelope, .envelope-flap, .letter, .name, .letter-shine, .wax-seal {
+  .envelope, .envelope-flap, .letter, .name, .letter-shine, .wax-seal, .envelope-body {
     backface-visibility: hidden;
   }
 
@@ -301,8 +304,12 @@
     pointer-events: none;
     z-index: 3;
     opacity: 0;
+    filter: drop-shadow(0 0 20px rgba(255,110,199,0.5)) drop-shadow(0 0 40px rgba(120,115,245,0.3));
+    transform: translateY(40px) scale(0.6);
+  }
+
+  .bg-3d-item.visible {
     animation: itemAppear 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards;
-    filter: drop-shadow(0 0 15px rgba(255,110,199,0.4)) drop-shadow(0 0 30px rgba(120,115,245,0.3));
   }
 
   @keyframes itemAppear {
@@ -518,7 +525,7 @@
     renderer.setSize(innerWidth, innerHeight);
   });
 
-  // === Envelope open/close with wax seal break ===
+  // === Envelope open/close ===
   const sceneEl = document.getElementById('scene');
   const envelope = document.getElementById('envelope');
   const seal = document.getElementById('seal');
@@ -549,7 +556,7 @@
     }
   }
 
-  function toggleEnvelope(e) {
+  function toggleEnvelope() {
     if (isOpen) {
       envelope.classList.remove('open');
       hint.style.display = 'block';
@@ -557,23 +564,26 @@
       envelope.classList.add('open');
       hint.style.display = 'none';
       setTimeout(createSealParticles, 150);
+      setTimeout(createSparkles, 900);
     }
     isOpen = !isOpen;
   }
 
-  seal.addEventListener('click', toggleEnvelope);
+  seal.addEventListener('click', (e) => {
+    e.stopPropagation();
+    toggleEnvelope();
+  });
 
-  // === 3D background items appearing like scroll reveal ===
+  // === Scroll-reveal background items ===
   function spawnBackgroundItem(emoji, size, left, top, delay) {
     setTimeout(() => {
       const el = document.createElement('div');
       el.className = 'bg-3d-item';
       el.textContent = emoji;
-      el.style.cssText = `font-size:${size}px;left:${left};top:${top};animation-delay:${delay}s;transform:translateY(40px) scale(0.6);`;
-      el.style.filter = 'drop-shadow(0 0 20px rgba(255,110,199,0.5)) drop-shadow(0 0 40px rgba(120,115,245,0.3))';
+      el.style.cssText = `font-size:${size}px;left:${left};top:${top};`;
       document.body.appendChild(el);
       requestAnimationFrame(() => {
-        el.style.animation = `itemAppear 1.2s cubic-bezier(0.23, 1, 0.32, 1) forwards`;
+        el.classList.add('visible');
       });
     }, delay);
   }
@@ -603,18 +613,6 @@
       setTimeout(() => s.remove(), 5000);
     }
   }
-
-  const originalToggle = toggleEnvelope;
-  toggleEnvelope = function(e) {
-    originalToggle(e);
-    if (!isOpen) {
-      setTimeout(createSparkles, 900);
-      // Spawn extra decorative items on open
-      spawnBackgroundItem('💝', 36, '45%', '90%', 100);
-      spawnBackgroundItem('🌻', 40, '10%', '20%', 300);
-      spawnBackgroundItem('💐', 44, '88%', '80%', 500);
-    }
-  };
 </script>
 
 </body>
