@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Письмо для Ангелины</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;1,400&family=Jost:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --deep-1:#0b0f2a;
+    --deep-2:#161c40;
+    --gold:#c9a25e;
+    --gold-light:#f0dcae;
+    --paper:#faf1de;
+    --paper-shadow:#dcc79c;
+    --ink:#3c2c1e;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *{box-sizing:border-box;}
+  html{ scroll-padding-top:env(safe-area-inset-top,0px); }
+  html,body{
+    margin:0;
+    background:var(--deep-1);
+    font-family:'Jost',sans-serif;
+  }
+  body{ position:relative; }
+
+  /* invisible spacer that creates scroll distance driving the 3D sequence */
+  .scroll-track{ height:340vh; }
+
+  .pin{
+    position:fixed; inset:0;
+    display:flex; align-items:center; justify-content:center;
+    overflow:hidden;
+    background:radial-gradient(ellipse at 50% 30%, var(--deep-2), var(--deep-1) 70%);
+  }
+
+  .scroll-cue{
+    position:absolute; left:50%; bottom:28px; transform:translateX(-50%);
+    color:var(--gold-light); font-size:12px; letter-spacing:.08em;
+    opacity:.7; text-align:center; z-index:3;
+  }
+  .scroll-cue .arrow{ display:block; margin:6px auto 0; width:8px; height:8px; border-right:1px solid var(--gold-light); border-bottom:1px solid var(--gold-light); transform:rotate(45deg); animation:bob 1.6s ease-in-out infinite; }
+  @keyframes bob{ 0%,100%{ transform:rotate(45deg) translate(0,0); } 50%{ transform:rotate(45deg) translate(3px,3px); } }
+
+  /* --- drifting sparks --- */
+  #bgCanvas{ position:absolute; inset:0; z-index:0; pointer-events:none; }
+  .sparks{position:absolute;inset:0;overflow:hidden;pointer-events:none; will-change:transform; z-index:1;}
+  .spark{
+    position:absolute; bottom:-10px; width:3px;height:3px;
+    background:var(--gold-light); border-radius:50%; opacity:0;
+    box-shadow:0 0 6px 1px var(--gold-light);
+    animation:drift linear infinite, twinkle 2.4s ease-in-out infinite;
+  }
+  @keyframes drift{
+    0%{ transform:translateY(0) translateX(0); opacity:0; }
+    10%{ opacity:.9; } 90%{ opacity:.5; }
+    100%{ transform:translateY(-110vh) translateX(var(--drift-x,20px)); opacity:0; }
+  }
+  @keyframes twinkle{ 0%,100%{ transform:scale(1); } 50%{ transform:scale(1.8); } }
+
+  /* --- 3D scene --- */
+  .camera{ position:relative; z-index:2; perspective:1400px; }
+  .scene{
+    position:relative; width:300px; height:190px;
+    transform-style:preserve-3d;
+    will-change:transform;
+  }
+
+  .envelope{
+    position:absolute; inset:0;
+    transform-style:preserve-3d;
+    cursor:pointer;
+    filter:drop-shadow(0 25px 45px rgba(0,0,0,.55));
+    will-change:transform;
+  }
+
+  .env-body{ position:absolute; inset:0; background:linear-gradient(160deg, var(--paper), var(--paper-shadow)); border-radius:5px; }
+  .env-pocket{ position:absolute; left:0; right:0; bottom:0; height:100%; clip-path:polygon(0% 100%, 50% 38%, 100% 100%); background:linear-gradient(200deg, #ecd9b3, #cfb689); }
+  .env-side-l{ position:absolute; left:0; top:0; width:50%; height:100%; clip-path:polygon(0 0, 100% 50%, 0 100%); background:linear-gradient(100deg, #f3e3c2, #e2c99a); opacity:.9; }
+  .env-side-r{ position:absolute; right:0; top:0; width:50%; height:100%; clip-path:polygon(100% 0, 0 50%, 100% 100%); background:linear-gradient(260deg, #f3e3c2, #e2c99a); opacity:.9; }
+
+  .flap{
+    position:absolute; left:0; right:0; top:0; height:56%;
+    clip-path:polygon(0 0, 100% 0, 50% 100%);
+    background:linear-gradient(200deg, #f6e6c4, #d9bd8b);
+    transform-origin:top center; backface-visibility:hidden;
+    z-index:5; will-change:transform;
+  }
+
+  .seal{
+    position:absolute; left:50%; top:44%; width:52px; height:52px;
+    border-radius:50%;
+    background:radial-gradient(circle at 35% 30%, var(--gold-light), var(--gold) 60%, #8c6a34 100%);
+    display:flex; align-items:center; justify-content:center;
+    font-family:'EB Garamond', serif; font-size:22px; color:#4a3418;
+    box-shadow:0 3px 8px rgba(0,0,0,.4), inset 0 0 6px rgba(255,255,255,.4);
+    z-index:6; will-change:transform, opacity;
+  }
+
+  .letter-card{
+    position:absolute; left:50%; top:50%;
+    width:min(86vw,440px);
+    background:var(--paper);
+    border-radius:8px;
+    z-index:2;
+    will-change:transform, opacity, box-shadow;
+  }
+
+  .letter-text{
+    padding:38px 30px 34px;
+    font-family:'EB Garamond', serif;
+    color:var(--ink); line-height:1.65; font-size:16px;
+    text-align:center;
+  }
+  .letter-text .ribbon{
+    font-family:'Jost',sans-serif; font-size:11px; letter-spacing:4px;
+    text-transform:uppercase; color:#9c7a45;
+    margin-bottom:12px;
+  }
+  .letter-text .emoji-line{ font-size:22px; letter-spacing:8px; margin-bottom:14px; }
+  .letter-text .name{
+    font-size:clamp(30px,7vw,46px); font-weight:600; line-height:1.15;
+    margin:0 0 14px; letter-spacing:.5px;
+    font-family:'EB Garamond', serif; font-style:italic;
+    background:linear-gradient(90deg, #a8763a, var(--gold), #c9877a, var(--gold), #a8763a);
+    background-size:280% 100%;
+    -webkit-background-clip:text; background-clip:text; -webkit-text-fill-color:transparent;
+    animation:shimmer 6s linear infinite;
+  }
+  @keyframes shimmer{ 0%{background-position:0% 50%;} 100%{background-position:280% 50%;} }
+  .letter-text .message{ margin:0 0 6px; font-style:italic; color:#5a442f; }
+  .letter-text .divider{
+    width:46px; height:1px; margin:16px auto 0;
+    background:linear-gradient(90deg, transparent, var(--gold), transparent);
+  }
+  [contenteditable]{ outline:none; }
+  [contenteditable]:focus{ background:rgba(201,162,94,.12); border-radius:3px; }
+
+  .close-btn{
+    position:absolute; top:10px; right:12px; width:28px; height:28px;
+    border:none; background:none; cursor:pointer;
+    color:var(--ink); opacity:.5; font-size:18px; font-family:'Jost',sans-serif;
+    z-index:3;
+  }
+  .close-btn:hover{ opacity:.9; }
+
+  .overlay{ position:fixed; inset:0; z-index:10; will-change:background; }
+</style>
+</head>
+<body>
+
+<div class="scroll-track"></div>
+
+<div class="pin">
+  <canvas id="bgCanvas"></canvas>
+  <div class="sparks" id="sparks"></div>
+
+  <div class="camera">
+    <div class="scene" id="scene">
+      <div class="envelope" id="envelope">
+        <div class="env-body">
+          <div class="env-side-l"></div>
+          <div class="env-side-r"></div>
+          <div class="env-pocket"></div>
+        </div>
+
+        <div class="letter-card" id="letterCard">
+          <button class="close-btn" id="closeBtn" aria-label="Закрыть">✕</button>
+          <div class="letter-text">
+            <div class="ribbon">С Днём Рождения</div>
+            <div class="emoji-line">🌸 ✨ 🌸</div>
+            <h1 class="name" contenteditable="true">Ангелина</h1>
+            <p class="message" contenteditable="true">Ты достойна большего.<br>Люди, которые тебя ценят,<br>всегда будут рядом.</p>
+          </div>
+        </div>
+
+        <div class="flap" id="flap">
+          <div class="seal" id="seal">A</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="scroll-cue" id="scrollCue">прокрути вниз<span class="arrow"></span></div>
+  <div class="overlay" id="overlay"></div>
+</div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js"
+  }
+}
+</script>
+<script type="module">
+  import * as THREE from 'three';
+  // === 3D background: drifting symbols + geometric forms ===
+  (function(){
+    const canvas = document.getElementById('bgCanvas');
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(55, innerWidth/innerHeight, 0.1, 100);
+    camera.position.z = 18;
+    const renderer = new THREE.WebGLRenderer({ canvas, alpha:true, antialias:true });
+    renderer.setSize(innerWidth, innerHeight);
+    renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+
+    function symbolTexture(char, glow){
+      const s = 128;
+      const c = document.createElement('canvas'); c.width = c.height = s;
+      const ctx = c.getContext('2d');
+      ctx.font = (s*0.62)+'px "Segoe UI Emoji","Apple Color Emoji",sans-serif';
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.shadowColor = glow; ctx.shadowBlur = 22;
+      ctx.fillText(char, s/2, s/2);
+      ctx.fillText(char, s/2, s/2);
+      return new THREE.CanvasTexture(c);
+    }
+
+    const symbols = ['✨','💫','⭐','🌙','♡','❋','✦','🕊️'];
+    const glowA = '#f0dcae', glowB = '#e3a6a1';
+    const sprites = [];
+    symbols.forEach((ch,i)=>{
+      const tex = symbolTexture(ch, i%2 ? glowB : glowA);
+      const mat = new THREE.SpriteMaterial({ map:tex, transparent:true, depthWrite:false });
+      const count = 4;
+      for(let j=0;j<count;j++){
+        const sp = new THREE.Sprite(mat);
+        const scale = 0.7 + Math.random()*1.1;
+        sp.scale.set(scale,scale,1);
+        sp.position.set((Math.random()-0.5)*26, (Math.random()-0.5)*18, (Math.random()-0.5)*16 - 4);
+        sp.material.opacity = 0.35 + Math.random()*0.4;
+        sp.userData = {
+          baseY: sp.position.y, baseX: sp.position.x,
+          floatSpeed: 0.15 + Math.random()*0.3, floatPhase: Math.random()*Math.PI*2,
+          ampY: 0.5 + Math.random()*0.6, ampX: 0.3 + Math.random()*0.4,
+          spin: (Math.random()-0.5)*0.4
+        };
+        scene.add(sp);
+        sprites.push(sp);
+      }
+    });
+
+    const solids = [];
+    const geo = new THREE.IcosahedronGeometry(1, 0);
+    for(let i=0;i<9;i++){
+      const mat = new THREE.MeshBasicMaterial({ color: i%2 ? 0xc9a25e : 0xc9877a, wireframe:true, transparent:true, opacity:0.16 });
+      const m = new THREE.Mesh(geo, mat);
+      const s = 0.6 + Math.random()*1.4;
+      m.scale.set(s,s,s);
+      m.position.set((Math.random()-0.5)*30, (Math.random()-0.5)*20, (Math.random()-0.5)*14 - 8);
+      m.userData = { rx:(Math.random()-0.5)*0.004, ry:(Math.random()-0.5)*0.004 };
+      scene.add(m);
+      solids.push(m);
+    }
+
+    const fwColors = [0xffd700, 0xff69b4, 0xffffff, 0xff4500, 0x00ffff, 0xff6347, 0xffa500, 0x7fffd4];
+    const fwState = { rockets: [], particles: [] };
+    let fwActive = false;
+    const fwGeo = new THREE.SphereGeometry(0.08, 4, 4);
+
+    function spawnFirework(){
+      const startX = (Math.random()-0.5)*22;
+      const startY = -14;
+      const startZ = (Math.random()-0.5)*14 - 4;
+      const targetY = 5 + Math.random()*9;
+
+      const rocketGeo = new THREE.SphereGeometry(0.12, 6, 6);
+      const rocketMat = new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 1 });
+      const rocket = new THREE.Mesh(rocketGeo, rocketMat);
+      rocket.position.set(startX, startY, startZ);
+      rocket.userData = {
+        vy: 0.22 + Math.random()*0.12,
+        targetY,
+        trail: []
+      };
+      scene.add(rocket);
+      fwState.rockets.push(rocket);
+      fwActive = true;
+    }
+
+    function explodeBurst(x, y, z){
+      const count = 600 + Math.floor(Math.random()*400);
+      const color = fwColors[Math.floor(Math.random()*fwColors.length)];
+      const geo = new THREE.SphereGeometry(0.04, 4, 4);
+
+      for(let i=0;i<count;i++){
+        const mat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 1 });
+        const p = new THREE.Mesh(geo, mat);
+        p.position.set(x, y, z);
+        const theta = Math.random()*Math.PI*2;
+        const phi = Math.acos(2*Math.random()-1);
+        const speed = 0.08 + Math.random()*0.24;
+        p.userData = {
+          vx: Math.sin(phi)*Math.cos(theta)*speed,
+          vy: Math.sin(phi)*Math.sin(theta)*speed,
+          vz: Math.cos(phi)*speed,
+          life: 1,
+          decay: 0.004 + Math.random()*0.012
+        };
+        scene.add(p);
+        fwState.particles.push(p);
+      }
+    }
+
+    window.triggerFireworks = function(){
+      if(fwActive) return;
+      for(let k=0;k<8;k++){
+        setTimeout(()=> spawnFirework(), k*400);
+      }
+    };
+
+    let mouseX = 0, mouseY = 0;
+    addEventListener('mousemove', e=>{
+      mouseX = (e.clientX/innerWidth - 0.5)*2;
+      mouseY = (e.clientY/innerHeight - 0.5)*2;
+    });
+
+    function loop(){
+      requestAnimationFrame(loop);
+      const t = performance.now()*0.001;
+      const p = window.__scrollP || 0;
+
+      camera.position.x += (mouseX*2 - camera.position.x)*0.02;
+      camera.position.y += (-mouseY*1.2 - camera.position.y)*0.02;
+      camera.position.z = 18 - p*6;
+      camera.lookAt(0,0,0);
+
+      sprites.forEach(sp=>{
+        const u = sp.userData;
+        sp.position.y = u.baseY + Math.sin(t*u.floatSpeed + u.floatPhase)*u.ampY;
+        sp.position.x = u.baseX + Math.cos(t*u.floatSpeed*0.7 + u.floatPhase)*u.ampX;
+        sp.material.rotation += u.spin*0.01;
+      });
+      solids.forEach(m=>{
+        m.rotation.x += m.userData.rx;
+        m.rotation.y += m.userData.ry;
+      });
+
+      if(fwActive){
+        for(let i=fwState.rockets.length-1;i>=0;i--){
+          const r = fwState.rockets[i];
+          r.position.y += r.userData.vy;
+          if(r.position.y >= r.userData.targetY){
+            explodeBurst(r.position.x, r.position.y, r.position.z);
+            scene.remove(r);
+            r.material.dispose();
+            r.geometry.dispose();
+            fwState.rockets.splice(i,1);
+          }
+        }
+
+        for(let i=fwState.particles.length-1;i>=0;i--){
+          const p = fwState.particles[i];
+          p.userData.life -= p.userData.decay;
+          if(p.userData.life <= 0){
+            scene.remove(p);
+            p.material.dispose();
+            p.geometry.dispose();
+            fwState.particles.splice(i,1);
+          } else {
+            p.material.opacity = p.userData.life;
+            p.scale.setScalar(Math.max(0.05, p.userData.life));
+            p.userData.vy -= 0.0028;
+            p.position.x += p.userData.vx;
+            p.position.y += p.userData.vy;
+            p.position.z += p.userData.vz;
+          }
+        }
+
+        if(fwState.rockets.length === 0 && fwState.particles.length === 0) fwActive = false;
+      }
+
+      renderer.render(scene, camera);
+    }
+    loop();
+
+    addEventListener('resize', ()=>{
+      camera.aspect = innerWidth/innerHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(innerWidth, innerHeight);
+    });
+  })();
+</script>
+<script>
+  // --- ambient sparks ---
+  const sparksEl = document.getElementById('sparks');
+  const N = 22;
+  for(let i=0;i<N;i++){
+    const s = document.createElement('div');
+    s.className='spark';
+    const left = Math.random()*100;
+    const dur = 6+Math.random()*8;
+    const delay = Math.random()*10;
+    const driftX = (Math.random()*60-30)+'px';
+    s.style.left = left+'vw';
+    s.style.setProperty('--drift-x', driftX);
+    s.style.animationDuration = dur+'s, 2.4s';
+    s.style.animationDelay = delay+'s, '+(Math.random()*2)+'s';
+    sparksEl.appendChild(s);
+  }
+
+  const scene = document.getElementById('scene');
+  const envelope = document.getElementById('envelope');
+  const flap = document.getElementById('flap');
+  const seal = document.getElementById('seal');
+  const letterCard = document.getElementById('letterCard');
+  const overlay = document.getElementById('overlay');
+  const closeBtn = document.getElementById('closeBtn');
+  const scrollCue = document.getElementById('scrollCue');
+
+  const lerp = (a,b,t)=> a+(b-a)*t;
+  const clamp = (v,mn,mx)=> Math.min(mx,Math.max(mn,v));
+  const map = (p,a,b)=> clamp((p-a)/(b-a),0,1);
+
+  let ticking = false;
+  let fireworksTriggered = false;
+
+  function render(){
+    ticking = false;
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    const p = maxScroll > 0 ? clamp(window.scrollY / maxScroll, 0, 1) : 0;
+    window.__scrollP = p;
+
+    // camera: gentle 3D fly-in for the whole scene
+    const camP = map(p, 0, .28);
+    scene.style.transform =
+      `rotateY(${lerp(-30,0,camP)}deg) rotateX(${lerp(12,0,camP)}deg) translateZ(${lerp(-140,0,camP)}px)`;
+
+    // envelope settles + tiny idle tilt tied to scroll for depth
+    const envP = map(p, 0, .28);
+    envelope.style.transform =
+      `translateY(${lerp(50,0,envP)}px) rotateZ(${lerp(-6,0,envP)}deg)`;
+
+    // flap opens
+    const flapP = map(p, .28, .55);
+    flap.style.transform = `rotateX(${lerp(0,-178,flapP)}deg) translateZ(1px)`;
+    seal.style.opacity = 1 - flapP;
+    seal.style.transform = `translate(-50%,-50%) scale(${lerp(1,.3,flapP)}) rotate(${lerp(0,35,flapP)}deg)`;
+
+    // envelope base fades back once opened
+    const envFadeP = map(p, .55, .72);
+    envelope.querySelector('.env-body').style.opacity = 1 - envFadeP*0.85;
+
+    // letter rises out of the envelope and expands toward the viewer
+    const letterP = map(p, .5, .9);
+    const ty = lerp(30, -46, letterP);      // % vertical travel, relative to its own height
+    const scale = lerp(.32, 1, letterP);
+    const rotX = lerp(20, 0, letterP);
+    const tz = lerp(-40, 160, letterP);
+    letterCard.style.opacity = map(p, .5, .62);
+    letterCard.style.transform =
+      `translate(-50%,${ty}%) translateZ(${tz}px) scale(${scale}) rotateX(${rotX}deg)`;
+    letterCard.style.boxShadow = `0 ${lerp(6,60,letterP)}px ${lerp(14,90,letterP)}px rgba(0,0,0,${lerp(.15,.6,letterP)})`;
+    letterCard.style.zIndex = letterP > .5 ? 20 : 2;
+
+    // dim the world as the letter takes over
+    overlay.style.background = `rgba(6,8,20,${lerp(0,.55,map(p,.55,.95))})`;
+    overlay.style.pointerEvents = p > .6 ? 'auto' : 'none';
+
+    // sparks drift a touch with scroll for parallax depth
+    sparksEl.style.transform = `translateY(${p*-60}px)`;
+
+    // scroll cue fades once the story begins
+    scrollCue.style.opacity = 1 - map(p,0,.12);
+
+    if(p >= 0.95 && !fireworksTriggered){
+      fireworksTriggered = true;
+      window.triggerFireworks && window.triggerFireworks();
+    }
+  }
+
+  function onScroll(){
+    if(!ticking){ requestAnimationFrame(render); ticking = true; }
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  window.addEventListener('resize', onScroll);
+  render();
+
+  envelope.addEventListener('click', ()=>{
+    const maxScroll = document.documentElement.scrollHeight - window.innerHeight;
+    if(window.scrollY < maxScroll*.9){
+      window.scrollTo({ top: maxScroll, behavior:'smooth' });
+    }
+  });
+  closeBtn.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    window.scrollTo({ top:0, behavior:'smooth' });
+  });
+  overlay.addEventListener('click', ()=> window.scrollTo({ top:0, behavior:'smooth' }));
+</script>
+
+</body>
+</html>
